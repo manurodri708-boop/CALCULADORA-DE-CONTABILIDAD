@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora Estrategia 2026</title>
+    <style>
+        :root { --green: #217346; --light-green: #e2efda; --border: #d4d4d4; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f3f3f3; display: flex; justify-content: center; min-height: 100vh; }
+        
+        /* Contenedor principal que ocupa todo el ancho en móviles */
+        .excel-app { width: 100%; max-width: 500px; background: white; border: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        
+        .header { background: var(--green); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 1.1rem; }
+        
+        .fx-bar { background: white; border-bottom: 1px solid var(--border); padding: 8px 12px; display: flex; align-items: center; font-size: 0.85rem; color: #444; }
+        .fx-icon { font-style: italic; font-weight: bold; color: var(--green); margin-right: 10px; font-size: 1rem; }
+
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        th, td { border: 1px solid #e0e0e0; height: 45px; vertical-align: middle; position: relative; }
+        
+        /* Estilo de encabezados de Excel */
+        th { background: #f8f9fa; color: #777; font-weight: normal; font-size: 0.7rem; width: 35px; }
+        .col-label { width: 60%; }
+        .col-value { width: 40%; }
+
+        .row-idx { background: #f8f9fa; text-align: center; color: #777; font-size: 0.7rem; width: 35px; }
+        .cell-label { padding-left: 12px; font-size: 0.85rem; font-weight: 500; background: #fafafa; }
+        
+        /* Inputs optimizados para móviles */
+        input, select { width: 100%; height: 100%; border: none; padding: 0 12px; font-size: 1rem; outline: none; background: transparent; color: #000; }
+        input:focus { background: #e8f0fe; }
+
+        .section-title { background: var(--light-green); font-weight: bold; text-align: center; color: #375623; font-size: 0.8rem; height: 30px; letter-spacing: 1px; }
+        
+        /* Celdas de resultados */
+        .res-cell { background: #fff2cc; font-weight: bold; text-align: right; padding-right: 12px; font-size: 1.05rem; color: #333; }
+        .total-cell { background: #d9ead3; color: #274e13; font-size: 1.2rem; }
+
+        /* Ajuste para pantallas muy pequeñas */
+        @media (max-width: 360px) {
+            .cell-label { font-size: 0.75rem; padding-left: 8px; }
+            .header { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="excel-app">
+    <div class="header">Joel Ortiz - Estrategia 2026</div>
+    <div class="fx-bar">
+        <span class="fx-icon">fx</span> <span id="formula-txt">B7 = ((B2-B3)*B5/100)-B4</span>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th class="col-label">A</th>
+                <th class="col-value">B</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="row-idx">1</td>
+                <td class="cell-label">Moneda / País</td>
+                <td>
+                    <select id="cur" onchange="setCur()">
+                        <option value="USD">USA (USD)</option>
+                        <option value="DOP">Rep. Dom (DOP)</option>
+                        <option value="MXN">México (MXN)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="row-idx">2</td>
+                <td class="cell-label">Precio Venta Ideal</td>
+                <td><input type="number" id="v2" value="40" oninput="calc()"></td>
+            </tr>
+            <tr>
+                <td class="row-idx">3</td>
+                <td class="cell-label">Costo Prod + Envío</td>
+                <td><input type="number" id="v3" value="8" oninput="calc()"></td>
+            </tr>
+            <tr>
+                <td class="row-idx">4</td>
+                <td class="cell-label">CPA (Publicidad)</td>
+                <td><input type="number" id="v4" value="5" oninput="calc()"></td>
+            </tr>
+            <tr>
+                <td class="row-idx">5</td>
+                <td class="cell-label">% Entrega</td>
+                <td><input type="number" id="v5" value="70" oninput="calc()"></td>
+            </tr>
+            <tr>
+                <td class="row-idx">6</td>
+                <td colspan="2" class="section-title">RESULTADOS NETOS</td>
+            </tr>
+            <tr>
+                <td class="row-idx">7</td>
+                <td class="cell-label">Ganancia Pedido</td>
+                <td id="r7" class="res-cell">$0.00</td>
+            </tr>
+            <tr>
+                <td class="row-idx">8</td>
+                <td class="cell-label">Rentabilidad %</td>
+                <td id="r8" class="res-cell">0%</td>
+            </tr>
+            <tr>
+                <td class="row-idx">9</td>
+                <td colspan="2" class="section-title">PROYECCIÓN 30 DÍAS</td>
+            </tr>
+            <tr>
+                <td class="row-idx">10</td>
+                <td class="cell-label">Ventas Diarias</td>
+                <td><input type="number" id="v10" value="10" oninput="calc()"></td>
+            </tr>
+            <tr>
+                <td class="row-idx">11</td>
+                <td class="cell-label">Ganancia Mensual</td>
+                <td id="r11" class="res-cell total-cell">$0.00</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const data = {
+        USD: { v: 40, c: 8, p: 5, e: 70, s: '$' },
+        DOP: { v: 2200, c: 800, p: 400, e: 70, s: 'RD$' },
+        MXN: { v: 750, c: 250, p: 150, e: 70, s: 'MX$' }
+    };
+
+    function setCur() {
+        const c = data[document.getElementById('cur').value];
+        document.getElementById('v2').value = c.v;
+        document.getElementById('v3').value = c.c;
+        document.getElementById('v4').value = c.p;
+        document.getElementById('v5').value = c.e;
+        calc();
+    }
+
+    function calc() {
+        const s = data[document.getElementById('cur').value].s;
+        const b2 = parseFloat(document.getElementById('v2').value) || 0;
+        const b3 = parseFloat(document.getElementById('v3').value) || 0;
+        const b4 = parseFloat(document.getElementById('v4').value) || 0;
+        const b5 = parseFloat(document.getElementById('v5').value) || 0;
+        const b10 = parseFloat(document.getElementById('v10').value) || 0;
+
+        // Fórmula: ((Venta - Costo) * % Entrega) - Publicidad
+        const b7 = ((b2 - b3) * (b5 / 100)) - b4;
+        const b8 = b2 > 0 ? (b7 / b2) * 100 : 0;
+        const b11 = b7 * b10 * 30;
+
+        document.getElementById('r7').innerText = s + b7.toFixed(2);
+        document.getElementById('r8').innerText = b8.toFixed(1) + '%';
+        document.getElementById('r11').innerText = s + b11.toFixed(2);
+        document.getElementById('formula-txt').innerText = B7 = ((${b2}-${b3})*${b5}%)-${b4} = ${b7.toFixed(2)};
+    }
+    calc();
+</script>
+</body>
+</html>
